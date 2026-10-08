@@ -148,9 +148,7 @@ def choose(state, goal, history):
     }
 
 
-def field_context(goal, action, page, history):
-    _, targets, _ = action_space(page["actions"])
-    index = next(index for index, candidate in targets["TYPE_TEXT"].items() if candidate["id"] == action["id"])
+def field_context(goal, action, index, page, history):
     field = {k: action.get(k) for k in ("label", "role", "value")}
     field.update(index=index, node=action["node"])
     guard = page.get("guards", {}).get(str(action["node"]))
