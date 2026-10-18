@@ -90,7 +90,8 @@ uv run --env-file .env python examples/run.py \
 ```
 
 Pass `keep_open=True` to `Agent`, or `--keep-open` to `examples/run.py`, to leave the
-agent-owned tab open and bring it to the foreground on cleanup. The default still
+agent-owned tab open and bring it to the foreground on normal cleanup. Context
+manager exceptions still close the owned tab. The default still
 closes the owned tab. Other Chrome tabs are unaffected. The final snapshot and URL
 remain available; keeping a tab open does not independently verify task success.
 For example, in PowerShell:

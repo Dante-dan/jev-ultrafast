@@ -171,5 +171,8 @@ class Agent:
     def __enter__(self):
         return self
 
-    def __exit__(self, *_args):
-        self.close()
+    def __exit__(self, exc_type, _exc, _traceback):
+        if exc_type is not None:
+            self.browser.close()
+        else:
+            self.close()

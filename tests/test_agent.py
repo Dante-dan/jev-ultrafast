@@ -357,3 +357,14 @@ def test_keep_open_does_not_preserve_failed_initialization(monkeypatch):
     with pytest.raises(RuntimeError, match="Observation failed"):
         loop.Agent("https://example.test/", "Inspect", keep_open=True)
     browser.close.assert_called_once_with()
+
+
+
+def test_keep_open_context_still_cleans_up_on_exception(monkeypatch):
+    browser = Mock()
+    browser.observe.return_value = page()
+    monkeypatch.setattr(loop, "Browser", Mock(return_value=browser))
+    with pytest.raises(RuntimeError, match="Task failed"):
+        with loop.Agent("https://example.test/", "Inspect", keep_open=True):
+            raise RuntimeError("Task failed")
+    browser.close.assert_called_once_with()
