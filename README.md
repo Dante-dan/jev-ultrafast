@@ -89,6 +89,19 @@ uv run --env-file .env python examples/run.py \
   --goal 'Find and open the Wikipedia article about Gödel’s incompleteness theorems.'
 ```
 
+Pass `keep_open=True` to `Agent`, or `--keep-open` to `examples/run.py`, to leave the
+agent-owned tab open and bring it to the foreground on cleanup. The default still
+closes the owned tab. Other Chrome tabs are unaffected. The final snapshot and URL
+remain available; keeping a tab open does not independently verify task success.
+For example, in PowerShell:
+
+```powershell
+uv run --env-file .env python examples/run.py `
+  --url https://en.wikipedia.org/wiki/Main_Page `
+  --goal "Open the article about Gödel’s incompleteness theorems." `
+  --keep-open
+```
+
 `uv run --env-file .env python examples/flights.py --keep-open` performs the flight search, checks the actual route/date/results, and saves its trace. It does not select or book a flight.
 
 ## Why it moves

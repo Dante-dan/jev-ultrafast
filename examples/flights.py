@@ -45,7 +45,7 @@ def main():
     args = parser.parse_args()
     folder = Path(args.output)
     folder.mkdir(parents=True, exist_ok=True)
-    agent = Agent(URL, GOALS)
+    agent = Agent(URL, GOALS, keep_open=args.keep_open)
     try:
         for state in agent.run():
             last = state["history"][-1] if state["history"] else {}
@@ -57,8 +57,7 @@ def main():
         (folder / "session.json").write_text(
             json.dumps({"target": agent.browser.target, "session": agent.browser.session})
         )
-        if not args.keep_open:
-            agent.close()
+        agent.close()
     print(json.dumps(state["verification"], indent=2))
     if not state["verification"]["passed"]:
         raise SystemExit("Final page did not satisfy the route/date checks")

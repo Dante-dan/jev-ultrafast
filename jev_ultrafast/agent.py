@@ -10,11 +10,12 @@ from .questions import MAX_STEPS
 
 
 class Agent:
-    def __init__(self, url, goals, *, record_dir=None, screenshots=False):
+    def __init__(self, url, goals, *, record_dir=None, screenshots=False, keep_open=False):
         task = goals.strip() if isinstance(goals, str) else "\n".join(goals).strip()
         if not task:
             raise ValueError("Supply a task")
         plan = [task]
+        self.keep_open = keep_open
         self.pending_text = None
         self.browser = Browser(url)
         self.record_dir = Path(record_dir) if record_dir else None
@@ -165,7 +166,7 @@ class Agent:
             yield self.command("tick")
 
     def close(self):
-        self.browser.close()
+        self.browser.close(keep_open=self.keep_open)
 
     def __enter__(self):
         return self

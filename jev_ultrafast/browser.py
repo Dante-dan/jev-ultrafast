@@ -106,9 +106,12 @@ class Browser:
         self.after_input = action if action["kind"] != "wait" else None
         return result
 
-    def close(self):
+    def close(self, *, keep_open=False):
         if self.target:
-            cdp("Target.closeTarget", targetId=self.target)
+            if keep_open:
+                self.call("Page.bringToFront")
+            else:
+                cdp("Target.closeTarget", targetId=self.target)
             self.target = None
 
 

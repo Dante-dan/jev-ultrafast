@@ -318,3 +318,42 @@ def test_navigation_during_prediction_reobserves_without_action(runner):
     assert runner.state["status"] == "ready"
     assert runner.state["decision"] is None
     runner.state["browser"].act.assert_not_called()
+
+
+@pytest.mark.parametrize("keep_open", [False, True])
+def test_agent_context_cleanup_preserves_opt_in_and_final_snapshot(monkeypatch, keep_open):
+    browser = Mock()
+    browser.observe.return_value = page()
+    monkeypatch.setattr(loop, "Browser", Mock(return_value=browser))
+    with loop.Agent("https://example.test/", "Inspect the page", keep_open=keep_open) as agent:
+        final = agent.snapshot()
+    browser.close.assert_called_once_with(keep_open=keep_open)
+    assert agent.snapshot() == final
+    assert final["page"]["url"] == "https://example.test/"
+
+
+@pytest.mark.parametrize("keep_open", [False, True])
+def test_browser_cleanup_only_affects_owned_target(monkeypatch, keep_open):
+    from jev_ultrafast import browser
+
+    cdp = Mock()
+    monkeypatch.setattr(browser, "cdp", cdp)
+    owned = browser.Browser.__new__(browser.Browser)
+    owned.target = "agent-owned"
+    owned.session = "owned-session"
+    owned.close(keep_open=keep_open)
+    owned.close(keep_open=keep_open)
+    if keep_open:
+        cdp.assert_called_once_with("Page.bringToFront", session_id="owned-session")
+    else:
+        cdp.assert_called_once_with("Target.closeTarget", targetId="agent-owned")
+    assert owned.target is None
+
+
+def test_keep_open_does_not_preserve_failed_initialization(monkeypatch):
+    browser = Mock()
+    browser.observe.side_effect = RuntimeError("Observation failed")
+    monkeypatch.setattr(loop, "Browser", Mock(return_value=browser))
+    with pytest.raises(RuntimeError, match="Observation failed"):
+        loop.Agent("https://example.test/", "Inspect", keep_open=True)
+    browser.close.assert_called_once_with()
